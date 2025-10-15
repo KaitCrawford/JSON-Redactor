@@ -1,26 +1,50 @@
-import ijson
 import json
-import typer
 import sys
-
 from hashlib import sha256
 from typing import Dict, List
+
+import ijson
+import typer
 from typing_extensions import Annotated
 
 
 def redact(
-    input_file: Annotated[str, typer.Argument(help="The path to the input file (defaults to stdin)")] = "",
-    keys: Annotated[str, typer.Option(help="The sensitive keys that should be redacted")] = "", 
-    key_file: Annotated[str, typer.Option(help="File containing a comma separated list of sensative keys to redact")] = "",
-    mask: Annotated[bool, typer.Option("--mask",help="(Default) Replace sensitive values with \"***Redacted***\"")] = None,
-    hash: Annotated[bool, typer.Option("--hash",help="Replace sensitive values with a deterministic sha256 hash")] = None,
+    input_file: Annotated[
+        str, typer.Argument(help="The path to the input file (defaults to stdin)")
+    ] = "",
+    keys: Annotated[
+        str, typer.Option(help="The sensitive keys that should be redacted")
+    ] = "",
+    key_file: Annotated[
+        str,
+        typer.Option(
+            help="File containing a comma separated list of sensative keys to redact"
+        ),
+    ] = "",
+    mask: Annotated[
+        bool,
+        typer.Option(
+            "--mask", help='(Default) Replace sensitive values with "***Redacted***"'
+        ),
+    ] = None,
+    hash: Annotated[
+        bool,
+        typer.Option(
+            "--hash", help="Replace sensitive values with a deterministic sha256 hash"
+        ),
+    ] = None,
 ):
 
     if not keys and not key_file:
-        print("One of '--keys' or '--key_file' options must be provided.", file=sys.stderr)
+        print(
+            "One of '--keys' or '--key_file' options must be provided.", file=sys.stderr
+        )
         sys.exit(1)
     elif keys and key_file:
-        print("Only one of '--keys' or '--key_file' options must be provided.", file=sys.stderr)
+        print(
+            "Only one of '--keys' or '--key_file' options must be provided.",
+            file=sys.stderr,
+        )
         sys.exit(1)
     elif key_file:
         # Read keys from provided file
@@ -35,7 +59,10 @@ def redact(
     key_list = [k.casefold() for k in keys.split(",")]
 
     if hash and mask:
-        print("Only one of '--mask' or '--hash' options must be provided.", file=sys.stderr)
+        print(
+            "Only one of '--mask' or '--hash' options must be provided.",
+            file=sys.stderr,
+        )
         sys.exit(1)
 
     if not input_file:
@@ -57,13 +84,19 @@ def redact(
                     if previous_object:
                         print(f"{json.dumps(previous_object)},")
                     previous_object = redacted_object
-                    counter += 1 
+                    counter += 1
             except ijson.IncompleteJSONError as e:
-                print(f"The JSON provided is invalid. Invalid object index: {counter}", file=sys.stderr)
+                print(
+                    f"The JSON provided is invalid. Invalid object index: {counter}",
+                    file=sys.stderr,
+                )
                 print(e, file=sys.stderr)
                 sys.exit(3)
             except AttributeError as e:
-                print(f"The JSON provided may be invalid. Invalid object index: {counter}", file=sys.stderr)
+                print(
+                    f"The JSON provided may be invalid. Invalid object index: {counter}",
+                    file=sys.stderr,
+                )
                 print(e, file=sys.stderr)
                 sys.exit(3)
             if previous_object:
