@@ -66,7 +66,9 @@ def redact(
         sys.exit(1)
 
     if not input_file:
+        # If no input file specified, read from stdin
         input_file = "/dev/stdin"
+
     try:
         with open(input_file, "rb") as f:
             print("[")
