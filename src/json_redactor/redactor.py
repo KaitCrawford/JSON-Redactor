@@ -42,7 +42,7 @@ def redact(
         sys.exit(1)
     elif keys and key_file:
         print(
-            "Only one of '--keys' or '--key_file' options must be provided.",
+            "Only one of '--keys' or '--key-file' options must be provided.",
             file=sys.stderr,
         )
         sys.exit(1)
